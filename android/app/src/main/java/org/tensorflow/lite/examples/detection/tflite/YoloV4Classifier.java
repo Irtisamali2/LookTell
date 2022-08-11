@@ -39,6 +39,7 @@ import org.json.JSONException;
 import org.json.JSONObject;
 import org.tensorflow.lite.Interpreter;
 import org.tensorflow.lite.examples.detection.MainActivity;
+import org.tensorflow.lite.examples.detection.distance.DistanceFinder;
 import org.tensorflow.lite.examples.detection.env.Logger;
 import org.tensorflow.lite.examples.detection.env.Utils;
 
@@ -175,7 +176,7 @@ public class YoloV4Classifier implements Classifier {
     // Number of threads in the java app
     private static final int NUM_THREADS = 4;
     private static boolean isNNAPI = false;
-    private static boolean isGPU = true;
+    private static boolean isGPU = false;
 
     // tiny or not
     private static boolean isTiny = false;
@@ -454,12 +455,16 @@ public class YoloV4Classifier implements Classifier {
                 final float yPos = bboxes[0][i][1];
                 final float w = bboxes[0][i][2];
                 final float h = bboxes[0][i][3];
+                // find distance of classes by providing the width of bounding box and the name class of the bounding box
+                String distanceInInch = DistanceFinder.getDistanceInInches(labels.get(detectedClass),Math.min(bitmap.getWidth() - 1, xPos + w / 2)-Math.max(0, xPos - w / 2));
+                // display the distance in inches on the screen
+
                 final RectF rectF = new RectF(
                         Math.max(0, xPos - w / 2),
                         Math.max(0, yPos - h / 2),
                         Math.min(bitmap.getWidth() - 1, xPos + w / 2),
                         Math.min(bitmap.getHeight() - 1, yPos + h / 2));
-                detections.add(new Recognition("" + i, labels.get(detectedClass),score,rectF,detectedClass ));
+                detections.add(new Recognition("" + i, labels.get(detectedClass)+"\n"+distanceInInch,score,rectF,detectedClass));
             }
         }
         return detections;
